@@ -71,9 +71,24 @@ const renderizarSeries = (serie) => {
         const card = document.createElement('div');
         card.classList.add('serie-card');
 
+        const año = serie.first_air_date ? new Date(serie.first_air_date).getFullYear() : 'N/A';
+
+        const imagenSrc = serie.poster_path
+            ? `${IMAGE_URL}${serie.poster_path}`
+            : 'https://via.placeholder.com/500x750?text=No+Image';
+
         card.innerHTML = `
         <div class="serie-card__content">
             <h3 class="serie-card__title">${serie.name}</h3>
+        </div>
+        <div class="serie-card__poster">
+            <img class="serie-card__image" src="${imagenSrc}" alt="${serie.name}">
+            <span class="serie-card__rating">⭐ ${serie.vote_average.toFixed(1)}</span>
+        </div>
+        <div class="serie-card__content">
+            <h3 class="serie-card__title">${serie.name}</h3>
+            <p class="serie-card__year">${año}</p>
+        </div>
         `;
         seriesGrid.appendChild(card);
     });
