@@ -85,8 +85,10 @@ const renderizarSeries = (serie) => {
         <div class="serie-card__content">
             <h3 class="serie-card__title">${serie.name}</h3>
             <p class="serie-card__year">${año}</p>
-        </div>
-        `;
+        </div>`;
+
+        card.addEventListener('click', () => abrirModalDetalle(serie.id));
+
         seriesGrid.appendChild(card);
     });
 }; 
@@ -126,8 +128,35 @@ searchInput.addEventListener('keypress', (e) => {
     }
 });
 
-
 clearBtn.addEventListener('click', () => {
     searchInput.value = '';
     obtenerSeriesPopulares();
 });
+
+const abrirModalDetalle = async (id) => {
+
+const respuesta = await fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=es-ES`);
+const detalles = await respuesta.json();
+
+const generos = detalles.genres.map(genero => genero.name).join(', ');
+
+modalBody.innerHTML = `
+    <h2 class="modal-title">${detalles.name}</h2>
+    <div class="modal__info">
+        <span><strong>Estado:</strong> ${detalles.status}</span>
+        <span><strong>Temporadas:</strong> ${detalles.number_of_seasons}</span>
+        <span><strong>Episodios:</strong> ${detalles.number_of_episodes}</span>
+        <span><strong>Géneros:</strong> ${generos}</span>
+    </div>
+    <p class="modal__overview">${detalles.overview || 'No hay sinopsis disponible.'}</p>`;
+
+    modal.classList.add('modal--show');
+};
+
+const cerrarModal = () => {
+    modal.classList.remove('modal--show');
+    modalBody.innerHTML = '';
+};
+
+modalClose.addEventListener('click', cerrarModal);
+modalOverlay.addEventListener('click', cerrarModal);
