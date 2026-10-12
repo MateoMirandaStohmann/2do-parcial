@@ -94,29 +94,51 @@ const renderizarSeries = (serie) => {
 }; 
 
 const obtenerSeriesPopulares = async () => {
-    mostrarLoading();
-
-    const respuesta = await fetch(`${BASE_URL}/tv/popular?api_key=${API_KEY}&language=es-ES`);
-    const datos = await respuesta.json();
-
-    renderizarSeries(datos.results);
-    resultsTitle.textContent = 'Series Populares';
-    ocultarLoading();
+    try {
+        mostrarLoading();
+        
+        const respuesta = await fetch(`${BASE_URL}/tv/popular?api_key=${API_KEY}&language=es-ES`);
+        
+        if (respuesta.status === 401) throw new Error('401');
+        if (!respuesta.ok) throw new Error('Error de conexión');
+        
+        const datos = await respuesta.json();
+        renderizarSeries(datos.results);
+        resultsTitle.textContent = 'Series Populares';
+        ocultarLoading();
+        
+    } catch (error) {
+        if (error.message.includes('401')) {
+            mostrarError('API Key inválida');
+        } else {
+            mostrarError('Error de conexión');
+        }
+    }
 };
 
 document.addEventListener('DOMContentLoaded', obtenerSeriesPopulares);
 
 const buscarSeries = async (termino) => {
-    mostrarLoading();
-
-    const query = encodeURIComponent(termino);
-
-    const respuesta = await fetch(`${BASE_URL}/search/tv?api_key=${API_KEY}&language=es-ES&query=${query}`);
-    const datos = await respuesta.json();
-
-    renderizarSeries(datos.results);
-    resultsTitle.textContent = `Resultados para: "${termino}"`;
-    ocultarLoading();
+    try {
+        mostrarLoading();
+        const query = encodeURIComponent(termino);
+        const respuesta = await fetch(`${BASE_URL}/search/tv?api_key=${API_KEY}&language=es-ES&query=${query}`);
+        
+        if (respuesta.status === 401) throw new Error('401');
+        if (!respuesta.ok) throw new Error('Error de conexión');
+        
+        const datos = await respuesta.json();
+        renderizarSeries(datos.results);
+        resultsTitle.textContent = `Resultados para "${termino}"`;
+        ocultarLoading();
+        
+    } catch (error) {
+        if (error.message.includes('401')) {
+            mostrarError('API Key inválida');
+        } else {
+            mostrarError('Error de conexión');
+        }
+    }
 };
 
 searchInput.addEventListener('keypress', (e) => {
@@ -134,23 +156,35 @@ clearBtn.addEventListener('click', () => {
 });
 
 const abrirModalDetalle = async (id) => {
-
-const respuesta = await fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=es-ES`);
-const detalles = await respuesta.json();
-
-const generos = detalles.genres.map(genero => genero.name).join(', ');
-
-modalBody.innerHTML = `
-    <h2 class="modal-title">${detalles.name}</h2>
-    <div class="modal__info">
-        <span><strong>Estado:</strong> ${detalles.status}</span>
-        <span><strong>Temporadas:</strong> ${detalles.number_of_seasons}</span>
-        <span><strong>Episodios:</strong> ${detalles.number_of_episodes}</span>
-        <span><strong>Géneros:</strong> ${generos}</span>
-    </div>
-    <p class="modal__overview">${detalles.overview || 'No hay sinopsis disponible.'}</p>`;
-
-    modal.classList.add('modal--show');
+    try {
+        const respuesta = await fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=es-ES`);
+        
+        if (respuesta.status === 401) throw new Error('401');
+        if (!respuesta.ok) throw new Error('Error de conexión');
+        
+        const detalles = await respuesta.json();
+        const generos = detalles.genres.map(genero => genero.name).join(', ');
+        
+        modalBody.innerHTML = `
+            <h2 class="modal__title">${detalles.name}</h2>
+            <div class="modal__info">
+                <span><strong>Estado:</strong> ${detalles.status}</span>
+                <span><strong>Temporadas:</strong> ${detalles.number_of_seasons}</span>
+                <span><strong>Episodios:</strong> ${detalles.number_of_episodes}</span>
+                <span><strong>Géneros:</strong> ${generos || 'No especificado'}</span>
+            </div>
+            <p class="modal__overview">${detalles.overview || 'No hay sinopsis disponible.'}</p>
+        `;
+        
+        modal.classList.add('modal--show');
+        
+    } catch (error) {
+        if (error.message.includes('401')) {
+            mostrarError('API Key inválida');
+        } else {
+            mostrarError('Error de conexión al cargar los detalles');
+        }
+    }
 };
 
 const cerrarModal = () => {
@@ -160,3 +194,4 @@ const cerrarModal = () => {
 
 modalClose.addEventListener('click', cerrarModal);
 modalOverlay.addEventListener('click', cerrarModal);
+
