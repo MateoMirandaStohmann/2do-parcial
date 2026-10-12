@@ -1,6 +1,6 @@
-//Mateo Sebastian Miranda Stohmann
+//Miranda Stohmann Mateo Sebastian
 
-const API_KEY = 'TU_API_KEY_AQUI'; 
+const API_KEY = 'add4b9fdfe17054610f47281bc42ec14'; 
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
@@ -64,8 +64,29 @@ themeToggle.addEventListener('click', () => {
 cargarTema();
 
 
-// ############################################################################
-// #                                                                          #
-// #                          TU CÓDIGO AQUÍ                    #
-// #                                                                          #
-// ############################################################################
+const renderizarSeries = (serie) => {
+    seriesGrid.innerHTML = '';
+
+    serie.forEach((serie) => {
+        const card = document.createElement('div');
+        card.classList.add('serie-card');
+
+        card.innerHTML = `
+        <div class="serie-card__content">
+            <h3 class="serie-card__title">${serie.name}</h3>
+        `;
+        seriesGrid.appendChild(card);
+    });
+}; 
+
+const obtenerSeriesPopulares = async () => {
+    mostrarLoading();
+
+    const respuesta = await fetch(`${BASE_URL}/tv/popular?api_key=${API_KEY}&language=es-ES`);
+    const datos = await respuesta.json();
+
+    renderizarSeries(datos.results);
+    ocultarLoading();
+};
+
+document.addEventListener('DOMContentLoaded', obtenerSeriesPopulares);
