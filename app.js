@@ -78,9 +78,6 @@ const renderizarSeries = (serie) => {
             : 'https://via.placeholder.com/500x750?text=No+Image';
 
         card.innerHTML = `
-        <div class="serie-card__content">
-            <h3 class="serie-card__title">${serie.name}</h3>
-        </div>
         <div class="serie-card__poster">
             <img class="serie-card__image" src="${imagenSrc}" alt="${serie.name}">
             <span class="serie-card__rating">⭐ ${serie.vote_average.toFixed(1)}</span>
@@ -101,7 +98,36 @@ const obtenerSeriesPopulares = async () => {
     const datos = await respuesta.json();
 
     renderizarSeries(datos.results);
+    resultsTitle.textContent = 'Series Populares';
     ocultarLoading();
 };
 
 document.addEventListener('DOMContentLoaded', obtenerSeriesPopulares);
+
+const buscarSeries = async (termino) => {
+    mostrarLoading();
+
+    const query = encodeURIComponent(termino);
+
+    const respuesta = await fetch(`${BASE_URL}/search/tv?api_key=${API_KEY}&language=es-ES&query=${query}`);
+    const datos = await respuesta.json();
+
+    renderizarSeries(datos.results);
+    resultsTitle.textContent = `Resultados para: "${termino}"`;
+    ocultarLoading();
+};
+
+searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const termino = searchInput.value.trim();
+        if (termino !== '') {
+            buscarSeries(termino);
+        }
+    }
+});
+
+
+clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    obtenerSeriesPopulares();
+});
